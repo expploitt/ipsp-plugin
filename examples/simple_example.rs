@@ -8,7 +8,7 @@ use futures::StreamExt;
 async fn main() {
 
     env_logger::init();
-    let ipsp = IpspManager::new("");
+    let ipsp = IpspManager::new(None);
 
     let (a, handle) = ipsp.start().await;
 
