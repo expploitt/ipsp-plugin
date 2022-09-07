@@ -69,7 +69,7 @@ impl IpspManager {
 
             if let Ok(devices) = session.get_devices().await {
                 for device in devices {
-                    if !device.connected {
+                    if !device.connected && device.name.is_some(){
                         println!("Discovered device: {:?}", device);
                         /* TRY TO CONNECT */
                         let mac = &device.mac_address.to_string();
