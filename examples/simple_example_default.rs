@@ -4,11 +4,12 @@ use futures::StreamExt;
 
 
 ///
-/// Simple example with name filter configuration
-///
+/// Simple example with default configuration which will not filter
+/// any type of device by name
+/// 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let ipsp = IpspManager::new(Some(String::from("IPSP Device")));
+    let ipsp = IpspManager::default();
 
     ipsp.start().await?;
 
