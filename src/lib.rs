@@ -1,3 +1,6 @@
+use std::fmt::Debug;
+use std::fs::File;
+use std::io::Write;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -44,6 +47,20 @@ impl IpspManager {
     pub async fn start(&self) -> (async_std::channel::Sender<()>, async_std::task::JoinHandle<()>) {
         let (sender, receiver) = async_std::channel::bounded(1);
 
+          
+        let mut mod_command = Command::new("modprobe")
+        .arg("bluetooth_6lowpan")
+        .spawn()
+        .expect("Error loading module");
+        mod_command.wait().unwrap();
+
+
+        let mut enable = File::create("/sys/kernel/debug/bluetooth/6lowpan_control").expect("Couldn't open file");
+        let command = format!("1");
+        enable.write_all(command.as_bytes()).unwrap();
+
+
+
         let ipsp = self.clone();
         let handle = async_std::task::spawn_blocking(move || {
             async_std::task::block_on(async { ipsp.run(receiver).await })
@@ -75,14 +92,19 @@ impl IpspManager {
                         let mac = &device.mac_address.to_string();
                         let _type = 2;
 
-                        let command = connect_command!(mac, _type);
-                        let mut command = Command::new(command)
-                            .spawn()
-                            .expect("Error connecting device");
-
-                        command.wait().unwrap();
-
-                        let mut addr_command = Command::new("ip address add 2001:db8::2/64 dev bt0")
+                        let mut file = File::create("/sys/kernel/debug/bluetooth/6lowpan_control").expect("Couldn't open file");
+                        let command = format!("connect {} {}",mac,_type);
+                        file.write_all(command.as_bytes()).unwrap();
+                        
+                      
+                        //println!("{:?}", command);
+                        
+                        let mut addr_command = Command::new("ip")
+                            .arg("address")
+                            .arg("add")
+                            .arg("2001:db8::2/64")
+                            .arg("dev")
+                            .arg("bt0")
                             .spawn()
                             .expect("Error configuring ip address");
 
