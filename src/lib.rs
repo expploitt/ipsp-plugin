@@ -26,7 +26,7 @@ pub struct IpspManager {
 impl Default for IpspManager {
     fn default() -> Self {
         Self {
-            name_filter: Some(String::from("GTI IPSP")),
+            name_filter: None,
             devices: vec![],
             flag: Arc::new(AtomicBool::new(true)),
         }
